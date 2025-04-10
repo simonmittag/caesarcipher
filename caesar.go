@@ -11,15 +11,12 @@ type CaesarCipher struct {
 	offset int
 }
 
-// NewCaesarCipher creates a new CaesarCipher with the given offset.
 func NewCaesarCipher(offset int) *CaesarCipher {
 	return &CaesarCipher{offset: offset}
 }
 
-// Shift handles both encryption and decryption based on a flag.
-// Pass `decrypt = true` for decryption (reverses the offset).
 func (c *CaesarCipher) Shift(reader io.Reader, writer io.Writer, decrypt bool) error {
-	// Adjust the offset for decryption
+	//decryption shifts left, encryption shifts right
 	shift := c.offset
 	if decrypt {
 		shift = -c.offset
@@ -37,29 +34,32 @@ func (c *CaesarCipher) Shift(reader io.Reader, writer io.Writer, decrypt bool) e
 	return scanner.Err()
 }
 
-// ShiftWithOffset performs the character rotation (shift) based on the given offset.
 func (c *CaesarCipher) ShiftWithOffset(input string, shift int) string {
 	shift = shift % 26 // Ensure shift is within bounds (0-25).
 	runes := []rune(input)
 
-	for i, r := range runes {
+	for i, letterAsNumber := range runes {
 		// we skip everything that's not in the roman alphabet
-		if unicode.IsLetter(r) {
-			base := 'A'
-			if unicode.IsLower(r) {
-				base = 'a'
+		if unicode.IsLetter(letterAsNumber) {
+			alphabetBase := 'A'
+			if unicode.IsLower(letterAsNumber) {
+				alphabetBase = 'a'
 			}
 
-			relativePosition := r - base
+			offBase := letterAsNumber - alphabetBase
 
 			//a few things happen here. We shift to a new position.
+			newPosition := offBase + rune(shift)
+
 			//but in case it's negative, we add 26, then mod 26
 			//so we overflow back into the bounds of the same alphabet
-			newPosition := relativePosition + rune(shift)
 			overflowPosition := (newPosition + 26) % 26
-			runes[i] = base + overflowPosition
+
+			//and now we replace the value
+			runes[i] = alphabetBase + overflowPosition
 		}
 	}
 
+	//at the end all numbers are converted back to a string with proper letters.
 	return string(runes)
 }
