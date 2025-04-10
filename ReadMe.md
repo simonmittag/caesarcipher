@@ -1,8 +1,6 @@
 # Caesar Cipher
 
-The **Caesar Cipher** is one of the simplest and oldest encryption techniques, shifting the alphabet by a fixed number of positions to encode or decode text. This project provides a lightweight command-line tool, written in Go, to encrypt and decrypt text files using the Caesar cipher.
-
----
+Monoalphabetic substitution is one of the simplest and oldest encryption techniques, shifting the alphabet by a fixed number of positions to encode or decode text. This project provides a lightweight command-line tool, written in Go, to encrypt and decrypt text files using the Caesar cipher.
 
 ## Getting Started
 
@@ -23,8 +21,6 @@ go install github.com/simonmittag/caesarcipher/cmd/caesar
 ```
 
 This will make the `caesar` command available globally.
-
----
 
 ## Usage
 
