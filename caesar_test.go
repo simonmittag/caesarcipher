@@ -2,9 +2,40 @@ package caesarcipher
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 )
+
+func BenchmarkShiftWithOffset(b *testing.B) {
+	cc := NewCaesarCipher(0)
+	baseString := strings.Repeat("A", 1024)
+	shift := 3
+
+	var tests []struct {
+		name  string
+		input string
+	}
+
+	for i := 0; i < 16; i++ {
+		size := 1 << i // 2^i
+		tests = append(tests, struct {
+			name  string
+			input string
+		}{
+			name:  fmt.Sprintf("%d chars", size*len(baseString)), // Calculate total characters
+			input: strings.Repeat(baseString, size),              // Repeat baseString to get the size
+		})
+	}
+
+	for _, test := range tests {
+		b.Run(test.name, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				cc.ShiftWithOffset(test.input, shift)
+			}
+		})
+	}
+}
 
 func TestShiftWithOffset(t *testing.T) {
 	cc := NewCaesarCipher(0)
