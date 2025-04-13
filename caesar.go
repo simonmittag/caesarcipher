@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"math"
 	"strings"
 	"time"
 	"unicode"
@@ -95,13 +96,7 @@ func (c *CaesarCipher) Crack(input io.Reader, output io.Writer) error {
 		return fmt.Errorf("failed to cache input: %w", err)
 	}
 
-	inputReaderForFrequency := bytes.NewReader(inputBuffer.Bytes())
-	sampleFreq, err := c.Frequency(inputReaderForFrequency)
-	if err != nil {
-		return fmt.Errorf("failed to calculate sample frequency: %w", err)
-	}
-
-	sse := c.Reference.Values.sumSquaredError(sampleFreq.ToFractions())
+	sse := math.MaxFloat64
 	var bestShiftOutput []byte
 
 	for i := 1; i <= 26; i++ {
