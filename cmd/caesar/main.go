@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-const Version = "0.1.1"
+const Version = "0.2.0"
 
 func main() {
 
@@ -15,10 +15,10 @@ func main() {
 	inputFile := flag.String("i", "", "Path to the input text file (required)")
 	outputFile := flag.String("o", "", "Path to the output text file (required)")
 	offset := flag.Int("s", 0, "Offset for the Caesar cipher (default: 0)")
-	encrypt := flag.Bool("e", false, "Encrypt the input file")
-	decrypt := flag.Bool("d", false, "Decrypt the input file")
-	frequency := flag.Bool("f", false, "Frequency analysis input file")
-	crack := flag.Bool("x", false, "Crack input file")
+	encrypt := flag.Bool("e", false, "Encrypt the input file and store results in output file")
+	decrypt := flag.Bool("d", false, "Decrypt the input file and store results in output file")
+	frequency := flag.Bool("f", false, "Perform frequency analysis on input file and store results to output file")
+	crack := flag.Bool("x", false, "Crack the input file and store results in output file")
 	help := flag.Bool("h", false, "Print usage information")
 
 	flag.Parse()
@@ -108,7 +108,7 @@ func main() {
 
 // printUsage prints the usage instructions
 func printUsage() {
-	fmt.Println("🌿 Caesar " + Version)
+	fmt.Println("🌿caesar " + Version)
 	fmt.Println("Usage: caesar [options]")
 	fmt.Println("Options:")
 	flag.PrintDefaults()

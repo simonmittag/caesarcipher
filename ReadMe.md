@@ -29,16 +29,20 @@ The `caesar` command-line tool supports encrypting and decrypting text files usi
 ### Options
 
 ```bash
-🌿 CaesarCipher 0.1.0
+🌿🌿caesar 0.2.0
 Usage: caesar [options]
-
 Options:
-  -e                Encrypt the input file.
-  -d                Decrypt the input file.
-  -s int            Offset for the Caesar cipher (default: 0).
-  -i string         Path to the input text file (required).
-  -o string         Path to the output text file (required).
-  -h                Print usage information.
+  -d    Decrypt the input file and store results in output file
+  -e    Encrypt the input file and store results in output file
+  -f    Perform frequency analysis on input file and store results to output file
+  -h    Print usage information
+  -i string
+        Path to the input text file (required)
+  -o string
+        Path to the output text file (required)
+  -s int
+        Offset for the Caesar cipher (default: 0)
+  -x    Crack the input file and store results in output file
 ```
 
 ### Examples
