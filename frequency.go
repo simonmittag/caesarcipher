@@ -3,11 +3,24 @@ package caesarcipher
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 )
 
 type Values map[rune]int
 type ValuesFloat map[rune]float32
+
+func (vf ValuesFloat) sumSquaredError(vf2 ValuesFloat) float64 {
+	sum := 0.0
+	for k, v := range vf {
+		vf2Value, ok := vf2[k]
+		if !ok {
+			vf2Value = 0.0
+		}
+		sum += math.Pow(float64(v-vf2Value), 2)
+	}
+	return sum
+}
 
 type Frequency struct {
 	Name   string

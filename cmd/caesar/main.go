@@ -90,10 +90,12 @@ func main() {
 
 	case "crack":
 		engFreq, err := caesarcipher.LoadFrequencyFloat("./frequencies/english.json")
+		cipher.Reference = *engFreq
 		if err != nil {
 			fmt.Printf("Error: Failed to load english frequencies: %v\n", err)
 			return
 		}
+		cipher.Crack(input, output)
 
 	}
 	if err != nil {

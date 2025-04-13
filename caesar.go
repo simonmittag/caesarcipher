@@ -2,6 +2,7 @@ package caesarcipher
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"strings"
@@ -10,7 +11,8 @@ import (
 )
 
 type CaesarCipher struct {
-	offset int
+	offset    int
+	Reference FrequencyFloat
 }
 
 func NewCaesarCipher(offset int) *CaesarCipher {
@@ -84,4 +86,52 @@ func (c *CaesarCipher) FrequencyAnalysis(line string) Frequency {
 		f.Values[char]++
 	}
 	return *f
+}
+
+func (c *CaesarCipher) Crack(input io.Reader, output io.Writer) error {
+	var inputBuffer bytes.Buffer
+
+	if _, err := io.Copy(&inputBuffer, input); err != nil {
+		return fmt.Errorf("failed to cache input: %w", err)
+	}
+
+	inputReaderForFrequency := bytes.NewReader(inputBuffer.Bytes())
+	sampleFreq, err := c.Frequency(inputReaderForFrequency)
+	if err != nil {
+		return fmt.Errorf("failed to calculate sample frequency: %w", err)
+	}
+
+	sse := c.Reference.Values.sumSquaredError(sampleFreq.ToFractions())
+	var bestShiftOutput []byte
+
+	for i := 1; i <= 26; i++ {
+		inputReader := bytes.NewReader(inputBuffer.Bytes())
+		tempWriter := new(bytes.Buffer)
+
+		c.offset = i
+		if err := c.Shift(inputReader, tempWriter, true); err != nil {
+			return fmt.Errorf("failed to shift with offset %d: %w", i, err)
+		}
+
+		shiftedInputReader := bytes.NewReader(tempWriter.Bytes())
+		shiftFreq, err := c.Frequency(shiftedInputReader)
+		if err != nil {
+			return fmt.Errorf("failed to calculate shifted frequency for offset %d: %w", i, err)
+		}
+
+		shiftSse := c.Reference.Values.sumSquaredError(shiftFreq.ToFractions())
+		if shiftSse < sse {
+			// Update the best result.
+			sse = shiftSse
+			bestShiftOutput = tempWriter.Bytes()
+		}
+	}
+
+	fmt.Printf("sse: %f\n", sse)
+	if bestShiftOutput != nil {
+		if _, err := output.Write(bestShiftOutput); err != nil {
+			return fmt.Errorf("failed to write best result to output: %w", err)
+		}
+	}
+	return nil
 }

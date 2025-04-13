@@ -3,9 +3,56 @@ package caesarcipher
 import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"math"
 	"reflect"
 	"testing"
 )
+
+func TestValuesFloat_sumSquaredError(t *testing.T) {
+	tests := []struct {
+		name     string
+		vf1      ValuesFloat
+		vf2      ValuesFloat
+		expected float64
+	}{
+		{
+			name: "Identical values",
+			vf1: ValuesFloat{
+				'a': 0.1, 'b': 0.2, 'c': 0.3,
+			},
+			vf2: ValuesFloat{
+				'a': 0.1, 'b': 0.2, 'c': 0.3,
+			},
+			expected: 0.0,
+		},
+		{
+			// test negative values
+			name: "Slightly different values",
+			vf1: ValuesFloat{
+				'a': 0.1, 'b': 0.2, 'c': 0.4,
+			},
+			vf2: ValuesFloat{
+				'a': 0.2, 'b': 0.1, 'c': 0.3,
+			},
+			expected: 0.03, // (0.1^2 + 0.1^2 + 0.1^2)
+		},
+		{
+			name:     "Empty maps",
+			vf1:      ValuesFloat{},
+			vf2:      ValuesFloat{},
+			expected: 0.0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.vf1.sumSquaredError(tt.vf2)
+			if math.Abs(result-tt.expected) > 1e-9 {
+				t.Errorf("Expected %v, got %v", tt.expected, result)
+			}
+		})
+	}
+}
 
 func TestNewFrequency(t *testing.T) {
 	freq := NewFrequency("test")
