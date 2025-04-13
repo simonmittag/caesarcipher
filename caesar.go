@@ -91,16 +91,15 @@ func (c *CaesarCipher) FrequencyAnalysis(line string) Frequency {
 
 func (c *CaesarCipher) Crack(input io.Reader, output io.Writer) error {
 	var inputBuffer bytes.Buffer
-
 	if _, err := io.Copy(&inputBuffer, input); err != nil {
 		return fmt.Errorf("failed to cache input: %w", err)
 	}
 
 	sse := math.MaxFloat64
-	var bestShiftOutput []byte
+	bestShift := 0
 
-	for i := 1; i <= 26; i++ {
-		inputReader := bytes.NewReader(inputBuffer.Bytes())
+	for i := 1; i <= 26; i++ { //64kb is the max we read when finding the best offset
+		inputReader := io.LimitReader(bytes.NewReader(inputBuffer.Bytes()), 2<<16)
 		tempWriter := new(bytes.Buffer)
 
 		c.offset = i
@@ -118,15 +117,15 @@ func (c *CaesarCipher) Crack(input io.Reader, output io.Writer) error {
 		if shiftSse < sse {
 			// Update the best result.
 			sse = shiftSse
-			bestShiftOutput = tempWriter.Bytes()
+			bestShift = i
 		}
 	}
 
-	fmt.Printf("sse: %f\n", sse)
-	if bestShiftOutput != nil {
-		if _, err := output.Write(bestShiftOutput); err != nil {
-			return fmt.Errorf("failed to write best result to output: %w", err)
-		}
+	fmt.Printf("squared sum error: %f, shift: %d\n", sse, bestShift)
+	c.offset = bestShift
+	err := c.Shift(bytes.NewReader(inputBuffer.Bytes()), output, true)
+	if err != nil {
+		return fmt.Errorf("failed to write best result to output: %w", err)
 	}
 	return nil
 }
