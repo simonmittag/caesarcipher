@@ -94,12 +94,15 @@ func (c *CaesarCipher) Crack(input io.Reader, output io.Writer) error {
 	if _, err := io.Copy(&inputBuffer, input); err != nil {
 		return fmt.Errorf("failed to cache input: %w", err)
 	}
+	fmt.Printf("\ncached %d bytes input", inputBuffer.Len())
 
 	sse := math.MaxFloat64
 	bestShift := 0
 
 	for i := 1; i <= 26; i++ { //64kb is the max we read when finding the best offset
+		fmt.Printf("\ntrying offset %d", i)
 		inputReader := io.LimitReader(bytes.NewReader(inputBuffer.Bytes()), 2<<16)
+		fmt.Printf("\nreading max 64k input sample")
 		tempWriter := new(bytes.Buffer)
 
 		c.offset = i
@@ -118,11 +121,12 @@ func (c *CaesarCipher) Crack(input io.Reader, output io.Writer) error {
 			// Update the best result.
 			sse = shiftSse
 			bestShift = i
+			fmt.Printf("\nnew least cumulative error: %f, shift: %d", sse, bestShift)
 		}
 	}
 
-	fmt.Printf("squared sum error: %f, shift: %d\n", sse, bestShift)
 	c.offset = bestShift
+	fmt.Printf("\n processing output at shift %d", bestShift)
 	err := c.Shift(bytes.NewReader(inputBuffer.Bytes()), output, true)
 	if err != nil {
 		return fmt.Errorf("failed to write best result to output: %w", err)
