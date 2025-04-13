@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"strings"
+	"time"
 	"unicode"
 )
 
@@ -62,4 +64,24 @@ func (c *CaesarCipher) ShiftWithOffset(input string, shift int) string {
 
 	//at the end all numbers are converted back to a string with proper letters.
 	return string(runes)
+}
+
+func (c *CaesarCipher) Frequency(reader io.Reader) (Frequency, error) {
+	scanner := bufio.NewScanner(reader)
+	res := NewFrequency("Sampled-" + time.Now().Format(time.RFC3339))
+	for scanner.Scan() {
+		//we lowercase for analysis to reduce surface
+		line := strings.ToLower(scanner.Text())
+		res.Merge(c.FrequencyAnalysis(line))
+	}
+	err := scanner.Err()
+	return *res, err
+}
+
+func (c *CaesarCipher) FrequencyAnalysis(line string) Frequency {
+	f := NewFrequency("line")
+	for _, char := range []rune(line) {
+		f.Values[char]++
+	}
+	return *f
 }

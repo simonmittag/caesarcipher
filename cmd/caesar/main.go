@@ -1,13 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/simonmittag/caesarcipher"
 	"os"
 )
 
-const Version = "0.1.0"
+const Version = "0.1.1"
 
 func main() {
 
@@ -17,6 +18,7 @@ func main() {
 	offset := flag.Int("s", 0, "Offset for the Caesar cipher (default: 0)")
 	encrypt := flag.Bool("e", false, "Encrypt the input file")
 	decrypt := flag.Bool("d", false, "Decrypt the input file")
+	frequency := flag.Bool("f", false, "Frequency analysis input file")
 	help := flag.Bool("h", false, "Print usage information")
 
 	flag.Parse()
@@ -26,8 +28,8 @@ func main() {
 		return
 	}
 
-	if !*encrypt && !*decrypt {
-		fmt.Println("Error: You must specify either -e (encrypt) or -d (decrypt).")
+	if !*encrypt && !*decrypt && !*frequency {
+		fmt.Println("Error: You must specify either -e (encrypt) or -d (decrypt) or -f frequency.")
 		printUsage()
 		os.Exit(1)
 	}
@@ -46,6 +48,8 @@ func main() {
 		mode = "encrypt"
 	} else if *decrypt {
 		mode = "decrypt"
+	} else if *frequency {
+		mode = "frequency"
 	}
 
 	input, err := os.Open(*inputFile)
@@ -69,6 +73,26 @@ func main() {
 		err = cipher.Shift(input, output, false) // false indicates encryption
 	case "decrypt":
 		err = cipher.Shift(input, output, true) // true indicates decryption
+	case "frequency":
+		freq, err := cipher.Frequency(input)
+		if err != nil {
+			fmt.Printf("Error: Frequency analysis failed: %v\n", err)
+			return
+		}
+
+		jsonData, err := json.MarshalIndent(freq.ToFractions(), "", "  ")
+		if err != nil {
+			fmt.Printf("Error: Failed to encode frequency analysis to JSON: %v\n", err)
+			return
+		}
+
+		_, err = output.Write(jsonData)
+		if err != nil {
+			fmt.Printf("Error: Failed to write JSON output to file: %v\n", err)
+			return
+		}
+
+		fmt.Println("Frequency analysis complete")
 	}
 
 	if err != nil {
