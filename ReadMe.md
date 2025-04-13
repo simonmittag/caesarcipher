@@ -29,7 +29,7 @@ The `caesar` command-line tool supports encrypting and decrypting text files usi
 ### Options
 
 ```bash
-🌿🌿caesar 0.2.0
+🌿caesar 0.2.0
 Usage: caesar [options]
 Options:
   -d    Decrypt the input file and store results in output file
