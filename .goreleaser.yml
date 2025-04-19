@@ -1,0 +1,36 @@
+version: 2
+
+builds:
+  - id: caesar
+    binary: caesar
+    main: ./cmd/caesar/main.go
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+
+release:
+  github:
+    owner: simonmittag
+    name: caesar
+
+universal_binaries:
+  - id: caesar
+    replace: true
+
+checksum:
+  name_template: 'checksums.txt'
+
+brews:
+  - name: caesar
+    homepage: https://github.com/simonmittag/caesar
+    repository:
+      owner: simonmittag
+      name: homebrew-cli
+    commit_author:
+      name: simonmittag
+      email: simonmittag@gmail.com
