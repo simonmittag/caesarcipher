@@ -27,7 +27,7 @@ checksum:
 
 brews:
   - name: caesar
-    homepage: https://github.com/simonmittag/caesar
+    homepage: https://github.com/simonmittag/caesarcipher
     repository:
       owner: simonmittag
       name: homebrew-cli
