@@ -16,7 +16,7 @@ builds:
 release:
   github:
     owner: simonmittag
-    name: caesar
+    name: caesarcipher
 
 universal_binaries:
   - id: caesar
