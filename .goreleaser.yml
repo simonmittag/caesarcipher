@@ -21,6 +21,7 @@ release:
 universal_binaries:
   - id: caesar
     replace: true
+    name_template: "caesar"
 
 checksum:
   name_template: 'checksums.txt'
