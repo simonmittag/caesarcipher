@@ -1,7 +1,6 @@
 package caesarcipher
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
 	"io"
@@ -27,16 +26,16 @@ func (c *CaesarCipher) Shift(reader io.Reader, writer io.Writer, decrypt bool) e
 		shift = -c.offset
 	}
 
-	scanner := bufio.NewScanner(reader)
-	for scanner.Scan() {
-		line := scanner.Text()
-		resultLine := c.ShiftWithOffset(line, shift)
-		_, err := fmt.Fprintln(writer, resultLine)
-		if err != nil {
-			return err
-		}
+	content, err := io.ReadAll(reader)
+	if err != nil {
+		return err
 	}
-	return scanner.Err()
+
+	// Write the result
+	_, err = writer.Write(
+		[]byte(c.ShiftWithOffset(string(content), shift)),
+	)
+	return err
 }
 
 func (c *CaesarCipher) ShiftWithOffset(input string, shift int) string {
@@ -70,15 +69,21 @@ func (c *CaesarCipher) ShiftWithOffset(input string, shift int) string {
 }
 
 func (c *CaesarCipher) Frequency(reader io.Reader) (Frequency, error) {
-	scanner := bufio.NewScanner(reader)
-	res := NewFrequency("Sampled-" + time.Now().Format(time.RFC3339))
-	for scanner.Scan() {
-		//we lowercase for analysis to reduce surface
-		line := strings.ToLower(scanner.Text())
-		res.Merge(c.FrequencyAnalysis(line))
+	// Read all content at once
+	content, err := io.ReadAll(reader)
+	if err != nil {
+		return Frequency{}, err
 	}
-	err := scanner.Err()
-	return *res, err
+
+	// Create a new frequency analysis result
+	res := NewFrequency("Sampled-" + time.Now().Format(time.RFC3339))
+
+	// Process the entire content as a single string
+	// We lowercase for analysis to reduce surface
+	text := strings.ToLower(string(content))
+	res.Merge(c.FrequencyAnalysis(text))
+
+	return *res, nil
 }
 
 func (c *CaesarCipher) FrequencyAnalysis(line string) Frequency {
